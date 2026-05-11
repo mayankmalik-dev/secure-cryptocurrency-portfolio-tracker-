@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AntiGravity | Defy the Ordinary</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0a0a0f;
+            --accent-blue: #4f8ef7;
+            --accent-purple: #a855f7;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --glass-bg: rgba(15, 15, 25, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --error-red: #ef4444;
+            --success-green: #22c55e;
+            --gradient-primary: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- BACKGROUND CANVAS --- */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* --- CONTAINER & CARD --- */
+        .auth-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+            perspective: 1000px;
+            z-index: 10;
+        }
+
+        .auth-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: floatCard 6s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+        }
+
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .view-transition {
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            position: absolute;
+            width: calc(100% - 80px);
+            left: 40px;
+        }
+
+        .view-active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+            position: relative;
+            left: 0;
+            width: 100%;
+        }
+
+        /* --- LOGO & HEADER --- */
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo-wrapper {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo-planet {
+            width: 16px;
+            height: 16px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--accent-blue);
+        }
+
+        .logo-orbit {
+            position: absolute;
+            width: 30px;
+            height: 12px;
+            border: 1.5px solid var(--accent-purple);
+            border-radius: 50%;
+            transform: rotate(-25deg);
+            opacity: 0.7;
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tagline {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 300;
+        }
+
+        /* --- FORMS --- */
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input:focus {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 4px rgba(79, 142, 247, 0.15);
+        }
+
+        input.error {
+            border-color: var(--error-red);
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .forgot-link {
+            display: block;
+            text-align: right;
+            font-size: 0.8rem;
+            color: var(--accent-blue);
+            text-decoration: none;
+            margin-top: -12px;
+            margin-bottom: 24px;
+            transition: opacity 0.2s;
+        }
+
+        .forgot-link:hover {
+            opacity: 0.8;
+        }
+
+        /* --- BUTTONS --- */
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: var(--gradient-primary);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 20px -10px rgba(79, 142, 247, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -10px rgba(168, 85, 247, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary.success {
+            background: var(--success-green);
+            box-shadow: 0 10px 20px -10px rgba(34, 197, 94, 0.4);
+        }
+
+        /* --- SOCIAL LOGIN --- */
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 24px 0;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .divider:not(:empty)::before { margin-right: 15px; }
+        .divider:not(:empty)::after { margin-left: 15px; }
+
+        .btn-google {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+
+        .btn-google:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .google-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* --- FOOTER LINKS --- */
+        .auth-footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .auth-footer a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 500;
+            margin-left: 5px;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* --- SIGN UP SPECIFIC --- */
+        .password-strength {
+            height: 4px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .strength-bar {
+            height: 100%;
+            width: 0;
+            transition: all 0.4s ease;
+        }
+
+        .terms-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 24px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .terms-group input {
+            margin-top: 3px;
+            accent-color: var(--accent-blue);
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 30px 20px;
+            }
+            .view-transition {
+                width: calc(100% - 40px);
+                left: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="auth-container">
+        <div class="auth-card" id="auth-card">
+            
+            <!-- HEADER -->
+            <div class="header">
+                <div class="logo-wrapper">
+                    <div class="logo-icon">
+                        <div class="logo-planet"></div>
+                        <div class="logo-orbit"></div>
+                    </div>
+                    <span class="logo-text">AntiGravity</span>
+                </div>
+                <p class="tagline">Defy the ordinary.</p>
+            </div>
+
+            <!-- LOGIN VIEW -->
+            <div id="login-view" class="view-transition view-active">
+                <form id="login-form" onsubmit="handleAuth(event, 'login')">
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" placeholder="name@domain.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" placeholder="••••••••">
+                    </div>
+                    <a href="#" class="forgot-link">Forgot Password?</a>
+                    
+                    <button type="submit" class="btn-primary" id="login-btn">
+                        <span>Sign In</span>
+                    </button>
+
+                    <div class="divider">or continue with</div>
+
+                    <button type="button" class="btn-google">
+                        <svg class="google-icon" viewBox="0 0 24 24">
+                            <path fill="#EA4335" d="M12 5.04c1.94 0 3.51.68 4.6 1.7l3.48-3.48C17.91 1.24 15.21 0 12 0 7.31 0 3.25 2.69 1.21 6.6l4.13 3.21C6.34 7.04 8.91 5.04 12 5.04z"/>
+                            <path fill="#FBBC05" d="M22.79 10.45c.14.51.21 1.05.21 1.55 0 6.64-4.47 11.33-11 11.33-6.63 0-12-5.37-12-12S5.37 0 12 0c3.21 0 6.1.13 8.39 1.35l-3.32 3.32c-1.42-.87-3.23-1.4-5.07-1.4-4.64 0-8.4 3.76-8.4 8.4s3.76 8.4 8.4 8.4c3.42 0 6.13-1.85 7.4-4.52h-7.4v-4.43h11.79z"/>
+                            <path fill="#4285F4" d="M22.79 10.45H11v4.43h7.4c-.51 2.01-2.11 3.51-4.4 3.51-4.64 0-8.4-3.76-8.4-8.4s3.76-8.4 8.4-8.4c1.84 0 3.65.53 5.07 1.4l3.32-3.32C18.1 1.35 15.21 0 12 0 5.37 0 0 5.37 0 12s5.37 12 12 12c6.53 0 11-4.69 11-11.33 0-.5-.07-1.04-.21-1.55z"/>
+                            <path fill="#34A853" d="M1.21 6.6l4.13 3.21C6.34 7.04 8.91 5.04 12 5.04c1.94 0 3.51.68 4.6 1.7l3.48-3.48C17.91 1.24 15.21 0 12 0 7.31 0 3.25 2.69 1.21 6.6z"/>
+                        </svg>
+                        Google
+                    </button>
+
+                    <div class="auth-footer">
+                        Don't have an account?<a href="javascript:void(0)" onclick="toggleView('signup')">Sign Up</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- SIGN UP VIEW -->
+            <div id="signup-view" class="view-transition">
+                <form id="signup-form" onsubmit="handleAuth(event, 'signup')">
+                    <div class="form-group">
+                        <label for="signup-name">Full Name</label>
+                        <input type="text" id="signup-name" placeholder="John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" placeholder="name@domain.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" placeholder="••••••••" oninput="checkPasswordStrength(this.value)">
+                        <div class="password-strength">
+                            <div id="strength-bar" class="strength-bar"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-confirm">Confirm Password</label>
+                        <input type="password" id="signup-confirm" placeholder="••••••••">
+                    </div>
+
+                    <label class="terms-group">
+                        <input type="checkbox" id="terms-check">
+                        <span>I agree to the Terms & Privacy Policy</span>
+                    </label>
+                    
+                    <button type="submit" class="btn-primary" id="signup-btn">
+                        <span>Create Account</span>
+                    </button>
+
+                    <div class="auth-footer">
+                        Already have an account?<a href="javascript:void(0)" onclick="toggleView('login')">Sign In</a>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ─── MONGODB CONNECTION ───────────────────────────────
+        // Replace with your MongoDB connection string when ready:
+        // const MONGO_URI = "your-mongodb-connection-string-here";
+        //
+        // POST /api/signup  → saves { name, email, hashedPassword } to users collection
+        // POST /api/login   → checks email + bcrypt.compare(password, hash)
+        // ──────────────────────────────────────────────────────
+
+        /* --- PARTICLE BACKGROUND --- */
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const particleCount = 60;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 2 + 1;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(79, 142, 247, 0.5)';
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach((p, i) => {
+                p.update();
+                p.draw();
+
+                // Connect lines
+                for (let j = i + 1; j < particles.length; j++) {
+                    const p2 = particles[j];
+                    const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if (dist < 150) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(168, 85, 247, ${0.15 * (1 - dist/150)})`;
+                        ctx.stroke();
+                    }
+                }
+            });
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+
+        /* --- VIEW TOGGLE --- */
+        function toggleView(view) {
+            const loginView = document.getElementById('login-view');
+            const signupView = document.getElementById('signup-view');
+            const card = document.getElementById('auth-card');
+
+            card.style.transform = 'scale(0.98) translateY(-10px)';
+            
+            setTimeout(() => {
+                if (view === 'signup') {
+                    loginView.classList.remove('view-active');
+                    signupView.classList.add('view-active');
+                } else {
+                    signupView.classList.remove('view-active');
+                    loginView.classList.add('view-active');
+                }
+                card.style.transform = '';
+            }, 300);
+        }
+
+        /* --- PASSWORD STRENGTH --- */
+        function checkPasswordStrength(password) {
+            const bar = document.getElementById('strength-bar');
+            let strength = 0;
+            if (password.length > 5) strength++;
+            if (password.length > 8 && /[A-Z]/.test(password) && /[0-9]/.test(password)) strength++;
+            if (password.length > 10 && /[^A-Za-z0-9]/.test(password)) strength++;
+
+            const colors = ['#ef4444', '#f59e0b', '#22c55e'];
+            const widths = ['33%', '66%', '100%'];
+
+            if (password.length === 0) {
+                bar.style.width = '0';
+            } else {
+                bar.style.width = widths[strength] || '20%';
+                bar.style.backgroundColor = colors[strength] || colors[0];
+            }
+        }
+
+        /* --- AUTH HANDLERS --- */
+        async function handleAuth(event, type) {
+            event.preventDefault();
+            const btn = document.getElementById(type + '-btn');
+            const btnText = btn.querySelector('span');
+            const form = event.target;
+            const inputs = form.querySelectorAll('input');
+            let isValid = true;
+
+            // Reset errors
+            inputs.forEach(input => input.classList.remove('error'));
+
+            // Basic Validation
+            inputs.forEach(input => {
+                if (input.type !== 'checkbox' && !input.value) {
+                    input.classList.add('error');
+                    isValid = false;
+                }
+            });
+
+            if (type === 'signup') {
+                const pass = document.getElementById('signup-password').value;
+                const confirm = document.getElementById('signup-confirm').value;
+                const terms = document.getElementById('terms-check').checked;
+                
+                if (pass !== confirm) {
+                    document.getElementById('signup-confirm').classList.add('error');
+                    isValid = false;
+                }
+                if (!terms) {
+                    isValid = false;
+                    alert('Please agree to the Terms & Privacy Policy');
+                }
+            }
+
+            if (!isValid) return;
+
+            // Loading state
+            btn.style.pointerEvents = 'none';
+            btnText.innerHTML = '<svg style="width:20px;height:20px;animation:spin 1s linear infinite" viewBox="0 0 24 24"><path fill="currentColor" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/></svg>';
+
+            // ─── API FETCH PLACEHOLDER ──────────────────────────
+            try {
+                // Simulate network delay
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                /* 
+                const response = await fetch(`/api/${type}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(Object.fromEntries(new FormData(form)))
+                });
+                const data = await response.json();
+                */
+
+                // Success State UI
+                btn.classList.add('success');
+                btnText.innerHTML = '✓ Success';
+                
+                setTimeout(() => {
+                    alert(`${type === 'login' ? 'Logged In' : 'Account Created'} successfully!`);
+                    
+                    // Reset for demo
+                    btn.classList.remove('success');
+                    btnText.innerHTML = type === 'login' ? 'Sign In' : 'Create Account';
+                    btn.style.pointerEvents = 'all';
+                }, 1000);
+
+            } catch (err) {
+                btnText.innerHTML = 'Error';
+                btn.style.backgroundColor = 'var(--error-red)';
+                setTimeout(() => {
+                    btn.style.backgroundColor = '';
+                    btnText.innerHTML = type === 'login' ? 'Sign In' : 'Create Account';
+                    btn.style.pointerEvents = 'all';
+                }, 2000);
+            }
+        }
+
+        // Spinner animation
+        const style = document.createElement('style');
+        style.innerHTML = `@keyframes spin { from {transform:rotate(0deg);} to {transform:rotate(360deg);} }`;
+        document.head.appendChild(style);
+
+    </script>
+</body>
+</html>
