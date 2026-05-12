@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Eye, EyeOff, ShieldCheck, ArrowLeft, ArrowRight, RefreshCcw, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
+import { API_URLS } from '../config/api';
 
 interface LoginFormProps {
   onSwitch: () => void;
@@ -47,7 +48,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitch }) => {
     setLoading(true);
     
     try {
-      const response = await fetch('http://localhost:5001/api/auth/login', {
+      const response = await fetch(API_URLS.LOGIN, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -80,7 +81,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitch }) => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5001/api/auth/verify-otp', {
+      const response = await fetch(API_URLS.VERIFY_OTP, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email, otp }),

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Eye, EyeOff, Check } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
+import { API_URLS } from '../config/api';
 
 interface SignupFormProps {
   onSwitch: () => void;
@@ -61,7 +62,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitch }) => {
     setLoading(true);
     
     try {
-      const response = await fetch('http://localhost:5001/api/auth/signup', {
+      const response = await fetch(API_URLS.SIGNUP, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
